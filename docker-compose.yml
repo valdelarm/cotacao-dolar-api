@@ -1,0 +1,13 @@
+version: "3"
+services:
+  dolar-comercial-api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+  mysqldb:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=cotacao_db
