@@ -1,6 +1,8 @@
 # Cotação do dolar API
 
-Busca pela cotação do solicitado
+Busca pela cotação do dólar no dia solicitado
+
+- Os requisitos com a divisão das tarefas se encontram no arquivo Requisitos.md na raiz do projeto 
 
 ### Pré-requisitos
 
