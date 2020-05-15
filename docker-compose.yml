@@ -4,10 +4,19 @@ services:
     build: .
     ports:
       - "8080:8080"
+    networks:
+      - rede-cotacao-api
     depends_on:
-      - mysqldb
-  mysqldb:
-    image: mysql:8
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=cotacao_db
+      - mongodb
+  mongodb:
+    image: mongo:4.0.4
+    networks:
+      - rede-cotacao-api
+    ports:
+    - 27017:27017
+    expose:
+      - '27017'
+    container_name: cotacaodb
+networks:
+  rede-cotacao-api:
+    driver: bridge

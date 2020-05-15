@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,12 +26,8 @@ import java.util.zip.DataFormatException;
 @Slf4j
 public class CotacaoController {
 
-    private final CotacaoService cotacaoService;
-
-    public CotacaoController(CotacaoService cotacaoService) {
-        this.cotacaoService = cotacaoService;
-    }
-
+    @Autowired
+    private CotacaoService cotacaoService;
 
     @GetMapping("/{data}")
     @ApiOperation(value = "Busca a cotação de um dia específico a ser informado", notes = "formato dd-mm-aaaa",
