@@ -6,8 +6,6 @@ import br.com.martins.valdelar.repository.CotacaoRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,37 +33,49 @@ public class CotacaoServiceImpl implements CotacaoService {
 
         Optional<String> cotacao = apiCotacao.getCotacao(dataFormatada);
 
-        cotacao.ifPresent(this::salvaCotacao);
+        if (cotacao.isPresent()) {
+            Cotacao entidadeSalva = this.salvaCotacao(cotacao.get());
+            return Optional.ofNullable(CotacaoDTO.entityToDto(entidadeSalva));
+        }
 
-        log.info("cotacao do dia " + dataFormatada + " eh " + cotacao);
         return Optional.empty();
     }
 
-    private void salvaCotacao(String response) {
+    private Cotacao salvaCotacao(String response) {
+
+        Cotacao cotacao = convertJsonToEntity(response);
+
+        if (cotacao != null) {
+            log.info("Salvando a cotacao " + cotacao);
+            try {
+                return cotacaoRepository.save(cotacao);
+            } catch (Exception e) {
+                log.error("Erro ao salvar no banco de dados", e);
+            }
+
+        }
+        return null;
+    }
+
+    private Cotacao convertJsonToEntity(String response) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-          //  mapper.registerModule(new JavaTimeModule());
-            //mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            //DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
             Cotacao cotacao = new Cotacao();
 
-            JsonNode json = mapper.readTree(response).get("value");
+            JsonNode jsonNode = mapper.readTree(response).get("value");
 
-            if (json == null)
-                throw new NoResultException();
+            if (jsonNode == null || jsonNode.get(0) == null)
+                throw new NoResultException("Nao houve resultado na busca");
 
-            cotacao.setCotacaoCompra(json.get(0).get("cotacaoCompra").decimalValue());
-            cotacao.setCotacaoVenda(json.get(0).get("cotacaoVenda").decimalValue());
-            cotacao.setDataHoraCotacao(LocalDateTime.parse(json.get(0).get("dataHoraCotacao").asText().replace(' ', 'T')));
-
-
-            if (cotacao != null)
-                log.info(cotacao.getCotacaoCompra().toString());
-
-            cotacaoRepository.save(cotacao);
+            cotacao.setCotacaoCompra(jsonNode.get(0).get("cotacaoCompra").decimalValue());
+            cotacao.setCotacaoVenda(jsonNode.get(0).get("cotacaoVenda").decimalValue());
+            cotacao.setDataHoraCotacao(LocalDateTime.parse(jsonNode.get(0).get("dataHoraCotacao").asText().replace(' ', 'T')));
+            return cotacao;
         } catch (JsonProcessingException e) {
             log.error("Erro ao tentar converter resposta", e);
         }
+
+        return null;
     }
 }

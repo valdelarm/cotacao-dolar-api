@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Document(collection = "cotacao")
 @Getter
 @Setter
+@ToString
 public class Cotacao {
 
     private String id;
